@@ -41,6 +41,7 @@ private:
 	{
 		current_value = 0;
 	};
+
 public:
 	//Constructor
 	void Action(char _operator, float operand) 
@@ -70,7 +71,7 @@ public:
 		return calculatorInstance;
 	}
 
-	//helper method to not multiply by zero at first command
+	//helper method to not multiply by zero at first command(sendyou should send 1.0f)
 	void setCurrentValue(float userInputValue)
 	{
 		current_value = userInputValue;
@@ -138,7 +139,7 @@ public:
 		list.push_back(cmd);
 	}
 
-	void saveMemory()
+	void SaveMemory()
 	{
 		for (int i = 0; i < list.size(); i++)
 		{
@@ -204,18 +205,28 @@ public:
 		_commands.push_back(command);
 		current++;
 	}
+
+	void SaveMemory()
+	{
+		for (int i = 0; i < _commands.size(); i++)
+		{
+			_commands.erase(_commands.begin() + i);
+		}
+	}
+
 private:
 	// Initializers.
 	Calculator *_calculator;
-	vector<Command *> _commands;
+	vector<Command*> _commands;
 	float current; //unsigned int
 };
 
-//JIT
+//Default initialization
 Calculator *Calculator::calculatorInstance = nullptr;
 
 int main()
 {
+	User *crazyUser = new User();
 	Command *commands[6];
 	Calculator *mySuperCalculator = Calculator::getInstance();
 	
@@ -264,14 +275,18 @@ int main()
 			loop = false;
 			break;
 		case 1:
-			commands[4]->Execute(); //do macro
-			cout << "Result = " << mySuperCalculator->getCurrentValue() << endl; //Show current value after macro 
-			commands[4]->UnExecute(); //undo macro
+			crazyUser->Compute(commands[4]);
+			cout << "Macro Result = " << mySuperCalculator->getCurrentValue() << endl; //Show current value after macro 
+			crazyUser->Undo(1);
+			cout << "Undo Result = " << mySuperCalculator->getCurrentValue() << endl;
+			crazyUser->SaveMemory(); // we have to clean _commands vector. Otherwise undo operation will cause miscalculation when user do consecutive calculations between different macros or commands
 			break;
 		case 2:
-			commands[5]->Execute(); //do macro
-			cout << "Result = " << mySuperCalculator->getCurrentValue() << endl; //Show current value after macro 
-			commands[5]->UnExecute(); //undo macro
+			crazyUser->Compute(commands[5]); //do macro
+			cout << "Macro Result = " << mySuperCalculator->getCurrentValue() << endl; //Show current value after macro 
+			crazyUser->Undo(1); //undo macro
+			cout << "Undo Result = " << mySuperCalculator->getCurrentValue() << endl; //Show current value after macro 
+			crazyUser->SaveMemory(); // we have to clean _commands vector. Otherwise undo operation will cause miscalculation when user do consecutive calculations between different macros or commands
 			break;
 		default:
 			cout << "Please select valid number!" << endl;
@@ -282,8 +297,9 @@ int main()
 
 	//Kill them all!
 	MacroCommand *macroKiller = new MacroCommand();
-	macroKiller->saveMemory();
-	delete macroKiller, volumeOfCylinder, volumeOfSphere, squareOfRadius, mySuperCalculator, commands;
+	macroKiller->SaveMemory();
+	delete macroKiller, volumeOfCylinder, volumeOfSphere, squareOfRadius, mySuperCalculator, commands, crazyUser;
 
 	return 0;
 }
+//Arda Zeytin
